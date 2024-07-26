@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turkish-Russian Dictionary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Turkish-Russian Dictionary</h1>
+
+        <div id="auth-buttons">
+            <button id="openAuthModal">Login / Register</button>
+            <button id="logoutButton" style="display: none;">Logout</button>
+            <button id="adminPanelButton" style="display: none;">Admin Panel</button>
+        </div>
+
+        <div id="search-container">
+            <select id="category-select">
+                <option value="All">All Categories</option>
+                <option value="Political">Political</option>
+                <option value="Daily">Daily</option>
+                <option value="Trade/Economy">Trade/Economy</option>
+                <option value="Computer">Computer</option>
+            </select>
+            <input type="text" id="search-input" placeholder="Enter a word...">
+            <button id="search-button">Search</button>
+        </div>
+
+        <div id="results"></div>
+
+        <div id="pagination">
+            <button id="prev-page">Previous</button>
+            <span id="page-info"></span>
+            <button id="next-page">Next</button>
+        </div>
+
+        <div id="add-word-container" style="display: none;">
+            <h3>Add New Word</h3>
+            <input type="text" id="new-word" placeholder="Word">
+            <select id="new-word-language">
+                <option value="Turkish">Turkish</option>
+                <option value="Russian">Russian</option>
+            </select>
+            <input type="text" id="new-word-meaning" placeholder="Meaning">
+            <select id="new-word-category">
+                <option value="Political">Political</option>
+                <option value="Daily">Daily</option>
+                <option value="Trade/Economy">Trade/Economy</option>
+                <option value="Computer">Computer</option>
+            </select>
+            <button id="add-word-button">Add Word</button>
+        </div>
+    </div>
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login or Register</h2>
+            <div id="loginForm">
+                <h3>Login</h3>
+                <form id="login-form">
+                    <input type="text" id="username" placeholder="Username" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="submit" id="login-button">Login</button>
+                </form>
+            </div>
+            <div id="registerForm">
+                <h3>Register</h3>
+                <form id="register-form">
+                    <input type="text" id="register-username" placeholder="Username" required>
+                    <input type="password" id="register-password" placeholder="Password" required>
+                    <button type="submit" id="register-button">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>

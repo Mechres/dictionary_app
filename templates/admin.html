@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+  <style>
+    body {
+      background-color: #f5f5f5; /* Light gray background */
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white; /* White content area */
+      box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1);
+      border-radius: 8px;
+    }
+    .title{
+      text-align: center;
+    }
+    .subtitle{
+      max-width: 300px;
+      margin: 20px auto;
+      padding: 10px;
+      background-color: rgba(142, 93, 191, 0.31); /* White content area */
+      box-shadow: 4px 2px 3px rgba(10, 10, 10, 0.1);
+      border-radius: 20px;
+      text-align: center;
+    }
+    h1, h2 {
+      color: #363636;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: rgba(107, 40, 177, 0.75); /* Teal header */
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    tr:nth-child(even) {
+      background-color: #d2c6df; /* Subtle zebra striping */
+    }
+    .pagination {
+      max-width: 300px;
+      margin: 20px auto;
+      padding: 10px;
+      background-color: rgba(134, 0, 251, 0.31); /* White content area */
+      box-shadow: 4px 2px 3px rgba(10, 10, 10, 0.1);
+      border-radius: 20px;
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="title is-2">Admin Panel</h1>
+
+  <div class="tabs is-centered is-boxed">
+    <ul>
+      <li id="users-tab" class="is-active"><a onclick="showTab('users')">Users</a></li>
+      <li id="words-tab"><a onclick="showTab('words')">Words</a></li>
+      <li id="add-word-tab"><a onclick="showTab('add-word')">Add New Word</a></li>
+    </ul>
+  </div>
+
+  <div id="users-section">
+  <h2 class="subtitle is-4">Users</h2>
+  <table class="table is-hoverable is-fullwidth">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Admin</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user[0] }}</td>
+        <td>{{ user[1] }}</td>
+        <td>{{ 'Yes' if user[2] else 'No' }}</td>
+        <td>
+          <button class="button is-info is-small" onclick="toggleAdmin({{ user[0] }})">
+            Toggle Admin
+          </button>
+          <button class="button is-danger is-small" onclick="deleteUser({{ user[0] }})">
+            Delete
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+ </div>
+
+ <div id="words-section" style="display: none;">
+  <h2 class="subtitle is-4">Words</h2>
+  <table class="table is-hoverable is-fullwidth">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Word</th>
+        <th>Language</th>
+        <th>Meaning</th>
+        <th>Category</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for word in words %}
+      <tr>
+        <td>{{ word[0] }}</td>
+        <td>{{ word[1] }}</td>
+        <td>{{ word[2] }}</td>
+        <td>{{ word[3] }}</td>
+        <td>{{ word[4] }}</td>
+        <td>
+          <button class="button is-info is-small" onclick="editWord({{ word[0] }})">
+            Edit
+          </button>
+          <button class="button is-danger is-small" onclick="deleteWord({{ word[0] }})">
+            Delete
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="pagination">
+    {% if page > 1 %}
+    <a href="{{ url_for('admin_panel', page=page-1) }}" class="button">Previous</a>
+    {% endif %}
+    <span>Page {{ page }}</span>
+    {% if (page * per_page < total_users) or (page * per_page < total_words) %}
+    <a href="{{ url_for('admin_panel', page=page+1) }}" class="button">Next</a>
+    {% endif %}
+  </div>
+ </div>
+
+  <div id="add-word-section" style="display: none;">
+  <h2 class="subtitle is-4">Add New Word</h2>
+  <form id="add-word-form" class="box">
+    <div class="field">
+      <label class="label">Word</label>
+      <div class="control">
+        <input class="input" type="text" id="new-word" placeholder="Word" required>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Language</label>
+      <div class="control">
+        <div class="select is-fullwidth">
+          <select id="new-word-language" required>
+            <option value="">Select Language</option>
+            <option value="Turkish">Turkish</option>
+            <option value="Russian">Russian</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Meaning</label>
+      <div class="control">
+        <input class="input" type="text" id="new-word-meaning" placeholder="Meaning" required>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Category</label>
+      <div class="control">
+        <input class="input" type="text" id="new-word-category" placeholder="Category" required>
+      </div>
+    </div>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <button class="button is-link">Add Word</button>
+      </div>
+      <div class="control">
+        <a href="{{ url_for('import_excel') }}" class="button is-info">Import Excel</a>
+      </div>
+    </div>
+  </form>
+  </div>
+
+  <script src="/static/admin.js"></script>
+
+</div>
+
+</body>
+</html>

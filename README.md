@@ -35,9 +35,12 @@ dictionary_app/
 │   ├── index_old.html
 │   └── index.html
 │
+├── uploads/
+│
 ├── app.py
 ├── dictionary.db
 ├── excel_to_db.py
+├── example_excel.xlsx
 └── README.md
 ```
 

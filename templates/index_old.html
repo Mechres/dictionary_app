@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turkish-Russian Dictionary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Turkish-Russian Dictionary</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
+        <div id="search-container">
+            <select id="search-category">
+                <option value="All">All Categories</option>
+                <option value="Political">Political</option>
+                <option value="Daily">Daily</option>
+                <option value="Trade/Economy">Trade/Economy</option>
+                <option value="Computer">Computer</option>
+            </select>
+            <input type="text" id="search-word" placeholder="Search word">
+            <button id="search-button">Search</button>
+        </div>
+
+    <div id="results"></div>
+
+        <div id="pagination">
+            <button id="prev-page" disabled>Previous</button>
+            <span id="page-info"></span>
+            <button id="next-page" disabled>Next</button>
+        </div>
+
+        <div id="auth-container">
+            <h2>Login or Register</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button id="login-button">Login</button>
+            <button id="register-button">Register</button>
+            <button id="logout-button" style="display: none;">Logout</button>
+            <button id="admin-button" style="display: none;">Admin Panel</button>
+        </div>
+    </div>
+<!-- This is for creating an admin account! DELETE THIS!
+    <form action="{{ url_for('register_admin') }}" method="post">
+    <h2>Admin Registration</h2>
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="password" name="admin_key" placeholder="Admin Key" required>
+    <button type="submit">Register Admin</button>  -->
+</form>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+
+</body>
+</html>

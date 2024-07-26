@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Import Excel File</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #10131b;
+      color: #343a40;
+    }
+
+    .container {
+      max-width: 450px;
+      margin: auto;
+      padding: 30px;
+      background-color: rgba(255, 255, 255, 0.79);
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #212529;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    input[type="file"] {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #5930b8;
+      border-radius: 4px;
+    }
+
+    input[type="submit"] {
+      background-color: #8400ff;
+      color: #ffffff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #aa00d9;
+    }
+
+    a {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #9665e8;
+        text-decoration: none;
+    }
+    p {
+        text-align: center;
+        margin-top: 20px;
+        color: #e86579;
+        text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Import Excel File</h1>
+      <p>Prepare your Excel file with the following columns: word, language, meaning, category!</p>
+    <form method="post" enctype="multipart/form-data">
+        <label for="file">Choose File:</label>
+        <input type="file" id="file" name="file" accept=".xlsx, .xls">
+        <input type="submit" value="Import">
+    </form>
+    <a href="{{ url_for('admin_panel') }}">Back to Admin Panel</a>
+  </div>
+</body>
+</html>
