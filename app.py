@@ -3,12 +3,24 @@ from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, set_access_cookies, \
     unset_jwt_cookies
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SelectField
+from wtforms.validators import DataRequired, Length, EqualTo, Regexp
 import sqlite3
 from fuzzywuzzy import fuzz
 import re
 import pandas as pd
 from werkzeug.utils import secure_filename
 import os
+from flask_caching import Cache
+import csv
+import json
+from io import StringIO, BytesIO
+from flask import send_file
+from collections import Counter
+import random
+from datetime import datetime
+import xlsxwriter
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +31,8 @@ jwt = JWTManager(app)
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+
 
 # Create uploads folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -44,6 +58,10 @@ def init_db():
                   username TEXT UNIQUE,
                   password TEXT,
                   is_admin INTEGER DEFAULT 0)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS searches
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  word TEXT,
+                  timestamp DATETIME)''')
     conn.commit()
     conn.close()
 
@@ -55,8 +73,8 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-
+    word_of_the_day = get_word_of_the_day()
+    return render_template('index.html', word_of_the_day=word_of_the_day)
 
 @app.route('/admin/import_excel', methods=['GET', 'POST'])
 @jwt_required()
@@ -115,6 +133,7 @@ def import_excel():
 
 
 @app.route('/search', methods=['POST'])
+@cache.memoize(timeout=300)  # Cache for 5 minutes
 def search():
     data = request.get_json()
     word = data.get('word', '')
@@ -122,9 +141,11 @@ def search():
     page = data.get('page', 1)
     per_page = 10
 
+
     conn = sqlite3.connect('dictionary.db')
     c = conn.cursor()
-
+    c.execute('INSERT INTO searches (word, timestamp) VALUES (?, ?)', (word, datetime.now()))
+    conn.commit()
     query = '''SELECT word, language, meaning, category FROM dictionary 
                WHERE (word LIKE ? OR meaning LIKE ?) 
                AND (? = 'All' OR category = ?)'''
@@ -185,7 +206,7 @@ def admin_add_word():
 
     conn.commit()
     conn.close()
-
+    cache.delete_memoized(search)
     return jsonify({'message': 'Word added successfully in both languages'}), 201
 
 
@@ -403,6 +424,97 @@ def register_admin():
         conn.close()
 
     return redirect(url_for('index'))
+
+
+@app.route('/admin/export/<format>', methods=['GET'])
+@jwt_required()
+def export_dictionary(format):
+    conn = sqlite3.connect('dictionary.db')
+    c = conn.cursor()
+    c.execute('SELECT word, language, meaning, category FROM dictionary')
+    data = c.fetchall()
+    conn.close()
+
+    if format == 'csv':
+        si = StringIO()
+        cw = csv.writer(si)
+        cw.writerow(['Word', 'Language', 'Meaning', 'Category'])
+        cw.writerows(data)
+        output = BytesIO()
+        output.write(si.getvalue().encode('utf-8'))
+        output.seek(0)
+        return send_file(output,
+                         mimetype='text/csv',
+                         as_attachment=True,
+                         download_name='dictionary.csv')
+
+    elif format == 'json':
+        json_data = json.dumps([{'word': row[0], 'language': row[1], 'meaning': row[2], 'category': row[3]} for row in data])
+        return send_file(BytesIO(json_data.encode()),
+                         mimetype='application/json',
+                         as_attachment=True,
+                         download_name='dictionary.json')
+
+    elif format == 'excel':
+        df = pd.DataFrame(data, columns=['Word', 'Language', 'Meaning', 'Category'])
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Dictionary', index=False)
+        output.seek(0)
+        return send_file(output,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         as_attachment=True,
+                         download_name='dictionary.xlsx')
+
+    else:
+        return jsonify({'error': 'Invalid format'}), 400
+
+@app.route('/admin/statistics')
+@jwt_required()
+def statistics_dashboard():
+    conn = sqlite3.connect('dictionary.db')
+    c = conn.cursor()
+
+    # Total words
+    c.execute('SELECT COUNT(*) FROM dictionary')
+    total_words = c.fetchone()[0]
+
+    # Words by language
+    c.execute('SELECT language, COUNT(*) FROM dictionary GROUP BY language')
+    words_by_language = dict(c.fetchall())
+
+    # Words by category
+    c.execute('SELECT category, COUNT(*) FROM dictionary GROUP BY category')
+    words_by_category = dict(c.fetchall())
+
+    # Most searched words (assuming you've been logging searches)
+    c.execute('SELECT word FROM searches ORDER BY timestamp DESC LIMIT 100')
+    recent_searches = c.fetchall()
+    most_searched = Counter([search[0] for search in recent_searches]).most_common(10)
+
+    conn.close()
+
+    return render_template('statistics.html',
+                           total_words=total_words,
+                           words_by_language=words_by_language,
+                           words_by_category=words_by_category,
+                           most_searched=most_searched)
+
+
+def get_word_of_the_day():
+    conn = sqlite3.connect('dictionary.db')
+    c = conn.cursor()
+
+    # Use the current date as a seed for the random number generator
+    random.seed(datetime.now().date().toordinal())
+
+    c.execute('SELECT word, language, meaning, category FROM dictionary')
+    words = c.fetchall()
+    conn.close()
+
+    if words:
+        return random.choice(words)
+    return None
 
 
 if __name__ == '__main__':

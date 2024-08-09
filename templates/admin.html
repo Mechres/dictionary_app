@@ -71,13 +71,15 @@
 <body>
 
 <div class="container">
-  <h1 class="title is-2">Admin Panel</h1>
+    <h1 id="admin-panel" class="title is-2">Admin Panel</h1>
 
   <div class="tabs is-centered is-boxed">
     <ul>
       <li id="users-tab" class="is-active"><a onclick="showTab('users')">Users</a></li>
       <li id="words-tab"><a onclick="showTab('words')">Words</a></li>
       <li id="add-word-tab"><a onclick="showTab('add-word')">Add New Word</a></li>
+      <li id="export-tab"><a onclick="showTab('export')">Export Data</a></li>
+      <li id="statistics"><a href="/admin/statistics">Statistics</a></li>
     </ul>
   </div>
 
@@ -200,9 +202,32 @@
     </div>
   </form>
   </div>
-
+    <div id="export-section" style="display: none;">
+        <h2 class="subtitle is-4">Export Dictionary Data</h2>
+        <div class="buttons" text-align="center">
+            <a href="{{ url_for('export_dictionary', format='csv') }}" class="button is-primary">Export as CSV</a>
+            <a href="{{ url_for('export_dictionary', format='json') }}" class="button is-info">Export as JSON</a>
+            <a href="{{ url_for('export_dictionary', format='excel') }}" class="button is-success">Export as Excel</a>
+        </div>
+    </div>
+</div>
   <script src="/static/admin.js"></script>
+<script>
+function showTab(tabName) {
+    // Hide all sections
+    document.getElementById('users-section').style.display = 'none';
+    document.getElementById('words-section').style.display = 'none';
+    document.getElementById('add-word-section').style.display = 'none';
+    document.getElementById('export-section').style.display = 'none';
 
+    // Show the selected section
+    document.getElementById(tabName + '-section').style.display = 'block';
+
+    // Update active tab
+    document.querySelectorAll('.tabs li').forEach(li => li.classList.remove('is-active'));
+    document.getElementById(tabName + '-tab').classList.add('is-active');
+}
+</script>
 </div>
 
 </body>

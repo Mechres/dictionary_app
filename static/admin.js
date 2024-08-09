@@ -175,9 +175,9 @@ function showNotification(message, type) {
 }
 
 async function refreshWordList() {
-    // Implement this function to fetch and update the word list without reloading the page
+    //
 }
 
 async function refreshUserList() {
-    // Implement this function to fetch and update the user list without reloading the page
+    //
 }
