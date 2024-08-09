@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary Statistics</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Dictionary Statistics</h1>
+
+            <div class="columns">
+                <div class="column">
+                    <div class="box">
+                        <h2 class="subtitle">Total Words</h2>
+                        <p class="is-size-4">{{ total_words }}</p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="box">
+                        <h2 class="subtitle">Words by Language</h2>
+                        <ul>
+                            {% for language, count in words_by_language.items() %}
+                            <li>{{ language }}: {{ count }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="box">
+                        <h2 class="subtitle">Words by Category</h2>
+                        <ul>
+                            {% for category, count in words_by_category.items() %}
+                            <li>{{ category }}: {{ count }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <h2 class="subtitle">Most Searched Words</h2>
+                <ol>
+                    {% for word, count in most_searched %}
+                    <li>{{ word }} ({{ count }} searches)</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

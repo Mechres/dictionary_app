@@ -9,7 +9,16 @@
 <body>
     <div class="container">
         <h1>Turkish-Russian Dictionary</h1>
-
+    <!-- Word of the Day Section -->
+    <div id="word-of-the-day" class="box">
+        <h2 class="subtitle">Word of the Day</h2>
+        {% if word_of_the_day %}
+            <p><strong>{{ word_of_the_day[0] }}</strong> ({{ word_of_the_day[1] }}): {{ word_of_the_day[2] }}</p>
+            <p>Category: {{ word_of_the_day[3] }}</p>
+        {% else %}
+            <p>No word of the day available.</p>
+        {% endif %}
+    </div>
         <div id="auth-buttons">
             <button id="openAuthModal">Login / Register</button>
             <button id="logoutButton" style="display: none;">Logout</button>
